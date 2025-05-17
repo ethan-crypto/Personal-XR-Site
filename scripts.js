@@ -1,6 +1,6 @@
 AFRAME.registerComponent('navigate-on-click', {
   schema: {
-    url: {default: ''}
+    url: { default: '' }
   },
 
   init: function () {

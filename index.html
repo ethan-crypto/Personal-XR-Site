@@ -1,197 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
-    <link rel="manifest" href="/assets/favicon/site.webmanifest">
-    <title>Jseam's Virtual Space</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- A-Frame Imports -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
-    <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
-    <script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+  <!-- A-Frame Imports -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+  <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
+  <script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+  <script
+    src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
+  <!-- Adding additional fonts and text-specific components -->
+  <script src="https://unpkg.com/troika-three-text@0.46.4/dist/troika-three-text.umd.min.js"></script>
+  <script src="https://unpkg.com/aframe-troika-text@0.7.0/dist/aframe-troika-text.min.js"></script>
 
-    <!-- Google Analytics -->
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169212419-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
 
-      gtag('config', 'UA-169212419-1');
-    </script>
+    /* Style for colored hearts in the title */
+    .heart-green {
+      color: #7bc97f;
+    }
 
-    <!-- Zesty Market Integration -->
-    <script src="https://ipfs.io/ipns/lib.zesty.market/zesty-aframe-sdk.js"></script>
-    <!-- <script src="/assets/scripts/zesty-aframe-sdk.js"></script> -->
+    .heart-blue {
+      color: #a3d9ff;
+    }
 
-    <!-- Social Sharing -->
-    <meta property="og:title" content="Jseam's Virtual Space">
-    <meta property="og:type" content="website" />
-    <meta property="og:description" content="Checkout Jseam's Virtual Space and explore the VR/XR world here.">
-    <meta property="og:image" content="https://jseam.com/assets/img/socialsmall.png">
-    <meta property="og:url" content="https://jseam.com">
-    <meta name="twitter:card" content="summary_large_image">
+    /* Style for the page title */
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 100;
+      font-family: Arial, sans-serif;
+      font-size: 24px;
+      color: #000000;
+      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+    }
+  </style>
 </head>
+
 <body>
-  <!-- <iframe
-    src="https://viewm.moonicorn.network/#%7B%22options%22%3A%7B%22publisherAddr%22%3A%220xa7357939f51CEdBfAf0ce23d541C257905da86F4%22%2C%22whitelistedTokens%22%3A%5B%220x6B175474E89094C44Da98b954EedeAC495271d0F%22%5D%2C%22whitelistedType%22%3A%22legacy_728x90%22%2C%22randomize%22%3Atrue%2C%22targeting%22%3A%5B%5D%2C%22width%22%3A%22728%22%2C%22height%22%3A%2290%22%2C%22minPerImpression%22%3A%220%22%2C%22fallbackUnit%22%3A%22QmdAM4mQt3zSqFhvhdekotdwje3dHwZre1uwTrPt3rH56K%22%2C%22marketSlot%22%3A%22QmYj2VPPxwpEdbaUAq3fQUJ6JdemBVUBBCvzJquzENbmcz%22%7D%7D"
-    width="728"
-    height="90"
-    scrolling="no"
-    frameborder="0"
-    style="border: 0;"
-    onload="window.addEventListener('message', function(ev) {
-      if (ev.data.hasOwnProperty('adexHeight') && ('https://viewm.moonicorn.network' === ev.origin)) {
-        for (let f of document.getElementsByTagName('iframe')) {
-          if (f.contentWindow === ev.source) {
-            f.height = ev.data.adexHeight;
-          }
-        }
-      }
-    }, false)"
-  ></iframe> -->
-  <script src="scripts.js"></script>
-  <ins class="d1cb3a23" data-key="92b2225e36761629f56c26bb5b6586ed" data-click="%%CLICK_URL_ESC%%"></ins>
-  <script async src="https://adserver-meta.com/8d9a303f.js"></script>
-  <a-scene
-    light="defaultLightsEnabled: false"
-    shadow
-  >
+  <!-- Title with colored hearts -->
+  <div id="title-overlay">
+    Anna, ¿quieres ser la novia de Ethan? <span class="heart-green">&lt;3</span> <span class="heart-blue">&lt;3</span>
+  </div>
+
+  <a-scene light="defaultLightsEnabled: false" shadow>
     <a-assets timeout="10000">
-      <a-asset-item id="purpleheart" src="/assets/purpleheart/scene.gltf"></a-asset-item>
-      <!-- <a-asset-item id="jseam" src="/assets/nezuko/scene.gltf"></a-asset-item> -->
-      <!-- <a-asset-item id="jseam" src="/assets/avatar/scene.gltf"></a-asset-item> -->
-      <!-- <img id="spotify" src="/assets/icon/spotify.png"> -->
+      <a-asset-item id="frog_jump" src="/assets/frog_jump/scene.gltf"></a-asset-item>
     </a-assets>
 
-    <!-- Shadow Light -->
-    <!-- <a-entity
-      light="
-        type: point;
-        castShadow: true;
-        intensity: 0.6;
-        shadowCameraVisible: false;
-      "
-      position="0 5 3"
-      rotation="0 40 0">
-    </a-entity> -->
-    <!-- No Shadow Light -->
-    <a-light type="point" position="0 0 0" rotation="0 20 0" target="#directionaltarget" intensity="0.75">
-      <a-entity id="directionaltarget" position="0 5 3"></a-entity>
-    </a-light>
+    <!-- Environment - using the exact same forest preset with the original ground color -->
+    <a-entity environment="preset: forest;" lighting="none" shadow></a-entity>
 
-    <a-entity
-      environment="preset: forest;"
-      lighting="none"
-      shadow
-    ></a-entity>
+    <!-- Lights -->
+    <a-light type="ambient" intensity="0.5"></a-light>
+    <a-light type="directional" position="0 1 1" intensity="0.8" castShadow="true"></a-light>
 
-    <a-entity
-      camera
-      mouse-cursor
-      look-controls
-      wasd-controls
-      position="0 1.6 0"
-      cursor="rayOrigin: mouse"
-    >
+    <!-- Camera -->
+    <a-entity camera look-controls wasd-controls position="0 1.6 0" cursor="rayOrigin: mouse"></a-entity>
+
+    <!-- Main question text -->
+    <a-entity id="question-text" troika-text="value: Anna, ¿quieres ser la novia de Ethan?; 
+                   color: #000000; 
+                   fontSize: 0.4;
+                   font: https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.woff;
+                   align: center;
+                   maxWidth: 4;" position="0 3.5 -4"></a-entity>
+
+    <!-- Single frog that will move from right to left - initially hidden -->
+    <a-entity id="hopping-frog" gltf-model="#frog_jump" scale="1 1 1" position="6 0.2 -2" rotation="0 -90 0"
+      animation-mixer="clip: metarig|jump;" visible="false">
     </a-entity>
 
-    <!-- Zesty Market Ad -->
-    <a-entity visible="true" zesty-banner="space: 2; beacon: true" position="1.2 0.8 -3"></a-entity>
-
-    <!-- Anime girl -->
-    <a-entity
-      gltf-model="#purpleheart"
-      scale="1.2 1.2 1.2"
-      position="0 0.2 -3"
-      animation-mixer="clip: solahiphop;"
-    >
+    <!-- Yes button with more prominent label -->
+    <a-entity id="yes-box" position="-0.7 1.5 -4">
+      <a-box scale="0.7 0.7 0.7" shadow color="#7bc97f" event-set__enter="_event: mouseenter; color: #4a9e50"
+        event-set__leave="_event: mouseleave; color: #7bc97f" animation__mouseenter="
+                property: rotation;
+                startEvents: mouseenter;
+                dur: 500;
+                to: 0 10 0;
+            " animation__mouseleave="
+                property: rotation;
+                startEvents: mouseleave;
+                dur: 500;
+                to: 0 0 0;
+            " class="clickable"></a-box>
+      <a-text value="YES" color="#ffffff" position="0 0 0.4" align="center" width="2" height="2" scale="2 2 2"
+        font="monoid"></a-text>
     </a-entity>
-    <!-- <a-entity
-      gltf-model="#jseam"
-      scale="0.0025 0.0025 0.0025"
-      position="0 0.2 -3"
-      animation-mixer="clip: outline|nezuko_blink;"
-    >
-    </a-entity> -->
-    <!-- <a-entity gltf-model="#jseam" scale="0.022 0.022 0.022" position="0 0 -3"></a-entity> -->
-    <a-text
-      value="Henlo! Welcome to my Virtual Space, it's pretty barebones with little interactivity for now.
-       Dm me @henlojseam on my socials if you have any suggestions :D"
-      position="-1.8 3.5 -4"
-      scale="0.8 0.8 0.8"
-    >
-    </a-text>
 
-    <a-box position="-1 0.5 -3" rotation="0 0 0" scale='0.5 0.5 0.5'
-      navigate-on-click="url: https://www.twitter.com/henlojseam/"
-      shadow
-      color="#1DA1F2"
-      event-set__enter="_event: mouseenter; color: #026fc9"
-      event-set__leave="_event: mouseleave; color: #1DA1F2"
-      animation__mouseenter="
-        property: rotation;
-        startEvents: mouseenter;
-        dur: 1000;
-        to: 0 360 0;
-      "
-    >
-      <a-text position="-0.4 0.2 0.5" value="twitter"> </a-text>
-    </a-box>
+    <!-- No button with more prominent label -->
+    <a-entity id="no-box" position="0.7 1.5 -4">
+      <a-box scale="0.7 0.7 0.7" shadow color="#ff6b6b" event-set__enter="_event: mouseenter; color: #e04949"
+        event-set__leave="_event: mouseleave; color: #ff6b6b" animation__mouseenter="
+                property: rotation;
+                startEvents: mouseenter;
+                dur: 500;
+                to: 0 -10 0;
+            " animation__mouseleave="
+                property: rotation;
+                startEvents: mouseleave;
+                dur: 500;
+                to: 0 0 0;
+            " class="clickable"></a-box>
+      <a-text value="NO" color="#ffffff" position="0 0 0.4" align="center" width="2" height="2" scale="2 2 2"
+        font="monoid"></a-text>
+    </a-entity>
 
-    <a-box position="-2 1.2 -3" rotation="0 0 0" scale='0.5 0.5 0.5'
-      navigate-on-click="url: https://open.spotify.com/artist/3Qp9DZAJ4PYhNHVQTr9Fq9?si=fqbYiK0WQCWCpfh1TGvuzw"
-      shadow
-      color="#1DB954"
-      event-set__enter="_event: mouseenter; color: #14813A"
-      event-set__leave="_event: mouseleave; color: #1DB954"
-      animation__mouseenter="
-        property: rotation;
-        startEvents: mouseenter;
-        dur: 1000;
-        to: 0 360 0;
-      "
-    >
-      <a-text position="-0.4 0.2 0.5" value="spotify"> </a-text>
-    </a-box>
-
-    <a-box position="-1 1.9 -3" rotation="0 0 0" scale='0.5 0.5 0.5'
-      navigate-on-click="url: https://soundcloud.com/henlojseam"
-      shadow
-      color="#ff7700"
-      event-set__enter="_event: mouseenter; color: #f34400"
-      event-set__leave="_event: mouseleave; color: #ff7700"
-      animation__mouseenter="
-        property: rotation;
-        startEvents: mouseenter;
-        dur: 1000;
-        to: 0 360 0;
-      "
-    >
-      <a-text position="-0.4 0.2 0.5" value="soundcloud"> </a-text>
-    </a-box>
-    <a-box position="1.2 1.9 -3" rotation="0 0 0" scale='1 1 1'
-      navigate-on-click="url: https://distrokid.com/hyperfollow/jseam/snail-love-feat-clyo"
-      shadow
-      color="#FF00FF"
-      event-set__enter="_event: mouseenter; color: #FF00FF"
-      event-set__leave="_event: mouseleave; color: #AA11AA"
-      animation__mouseenter="
-        property: rotation;
-        startEvents: mouseenter;
-        dur: 1000;
-        to: 0 360 0;
-      "
-    >
-      <a-text position="-0.7 0.1 0.5" scale="0.5 0.5 0.5" value="New Song!! Snail Love!"></a-text>
-      <a-text position="-0.6 -0.2 0.5" scale="0.5 0.5 0.5" value="Click Here Now!"></a-text>
-    </a-box>
+    <!-- Simple success message -->
+    <a-entity id="success-message" troika-text="value: Yay! You're the best!; 
+                   color: #7bc97f; 
+                   fontSize: 0.5;
+                   font: https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.woff;
+                   align: center;
+                   maxWidth: 4;" position="0 3 -4" visible="false">
+    </a-entity>
   </a-scene>
+
+  <script>
+    // Register the navigation component
+    AFRAME.registerComponent('navigate-on-click', {
+      schema: {
+        url: { default: '' }
+      },
+
+      init: function () {
+        var data = this.data;
+        var el = this.el;
+
+        el.addEventListener('click', function () {
+          window.open(data.url, '_blank');
+        });
+      }
+    });
+
+    // Wait for scene to load
+    document.querySelector('a-scene').addEventListener('loaded', function () {
+      const noBox = document.getElementById('no-box');
+      const yesBox = document.getElementById('yes-box');
+      const questionText = document.getElementById('question-text');
+      const hoppingFrog = document.getElementById('hopping-frog');
+      const successMessage = document.getElementById('success-message');
+      const titleOverlay = document.getElementById('title-overlay');
+
+      // Check if elements exist (prevents null reference errors)
+      if (!noBox || !yesBox || !questionText || !hoppingFrog || !successMessage) {
+        console.error("One or more required elements not found in the DOM");
+        return;
+      }
+
+      // Make the "No" button run away when clicked or hovered
+      noBox.addEventListener('mouseenter', moveNoBox);
+      noBox.addEventListener('click', moveNoBox);
+
+      function moveNoBox() {
+        // Generate random position within viewport
+        const randomX = (Math.random() * 4) - 2;
+        const randomY = (Math.random() * 3) + 0.5;
+        const randomZ = -2 - (Math.random() * 1); // Keeps it in front of other elements
+
+        // Animate to new position
+        noBox.setAttribute('animation', {
+          property: 'position',
+          to: `${randomX} ${randomY} ${randomZ}`,
+          dur: 300,
+          easing: 'easeOutQuad'
+        });
+      }
+
+      // When "Yes" is clicked, show the frog animation
+      yesBox.addEventListener('click', function () {
+        // Hide all UI elements
+        yesBox.setAttribute('visible', 'false');
+        noBox.setAttribute('visible', 'false');
+        questionText.setAttribute('visible', 'false');
+
+        // Safely hide the title overlay if it exists
+        if (titleOverlay) {
+          titleOverlay.style.display = 'none';
+        }
+
+        // Show the success message
+        successMessage.setAttribute('visible', 'true');
+
+        // Show the hopping frog
+        hoppingFrog.setAttribute('visible', 'true');
+
+        // Reset frog position
+        hoppingFrog.setAttribute('position', '8 0.2 -2');
+
+        // Start the frog animation
+        startSimpleFrogAnimation();
+
+        // Set a timeout to hide the success message after a few seconds
+        setTimeout(function () {
+          // Hide success message after 3 seconds to leave only the frog
+          successMessage.setAttribute('visible', 'false');
+        }, 3000);
+      });
+
+      // Simpler animation approach using continuous animation
+      function startSimpleFrogAnimation() {
+        // Create a simple animation that moves the frog from right to left
+        // and then teleports it back to the start
+
+        // This animation component will handle the continuous movement
+        AFRAME.registerComponent('frog-hop', {
+          init: function () {
+            const frog = this.el;
+            let startX = 8;  // Right side
+            let endX = -8;   // Left side
+            let hopDistance = 3; // Longer hop distance
+            let currentX = startX;
+            let animationRunning = false;
+
+            // Function to start a single hop
+            const startHop = () => {
+              if (animationRunning) return;
+              animationRunning = true;
+
+              // Calculate next position
+              const nextX = currentX - hopDistance;
+
+              // If we've gone past the left edge, reset to right
+              if (nextX < endX) {
+                // Instantly move frog back to start
+                frog.setAttribute('position', `${startX} 0.2 -2`);
+                currentX = startX;
+                animationRunning = false;
+                setTimeout(startHop, 100); // Small delay before starting next hop
+                return;
+              }
+
+              // Create the hop animation with a proper arc
+              frog.setAttribute('animation__x', {
+                property: 'position.x',
+                from: currentX,
+                to: nextX,
+                dur: 700,
+                easing: 'linear'
+              });
+
+              // Up and down animation for hopping
+              frog.setAttribute('animation__y', {
+                property: 'position.y',
+                from: 0.2,
+                to: 0.8,
+                dir: 'alternate',
+                dur: 700,
+                easing: 'easeInOutQuad'
+              });
+
+              // Update current position
+              currentX = nextX;
+
+              // When animation completes, start next hop
+              setTimeout(() => {
+                animationRunning = false;
+                startHop();
+              }, 700 + 300); // Hop duration + small pause between hops
+            };
+
+            // Start the hopping sequence
+            startHop();
+          }
+        });
+
+        // Add the component to the frog to start the animation
+        hoppingFrog.setAttribute('frog-hop', '');
+      }
+    });
+  </script>
 </body>
+
 </html>
