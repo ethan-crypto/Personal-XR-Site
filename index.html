@@ -44,26 +44,65 @@
       color: #000000;
       text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
     }
+
+    /* Celebration title that appears after saying yes */
+    #celebration-title {
+      position: fixed;
+      top: 30px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 200;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-size: 22px;
+      color: #000000;
+      /* Changed to black for better readability */
+      text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+      display: none;
+      /* Initially hidden */
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+
+    /* Red heart style for the title */
+    .red-heart {
+      color: #ff3366;
+      /* Bright red color for the heart */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 
 <body>
-  <!-- Title with colored hearts -->
-  <div id="title-overlay">
-    Anna, ¿quieres ser la novia de Ethan? <span class="heart-green">&lt;3</span> <span class="heart-blue">&lt;3</span>
+  <!-- Celebration title - initially hidden -->
+  <div id="celebration-title">
+    Yay its official now <span class="red-heart">❤</span>! To celebrate, enjoy this world filled with cute things you
+    like xoxo
   </div>
 
   <a-scene light="defaultLightsEnabled: false" shadow>
     <a-assets timeout="10000">
       <a-asset-item id="frog_jump" src="/assets/frog_jump/scene.gltf"></a-asset-item>
+      <a-asset-item id="diamond_sword" src="/assets/minecraft_diamond-sword/scene.gltf"></a-asset-item>
     </a-assets>
 
     <!-- Environment - using the exact same forest preset with the original ground color -->
     <a-entity environment="preset: forest;" lighting="none" shadow></a-entity>
 
     <!-- Lights -->
-    <a-light type="ambient" intensity="0.5"></a-light>
-    <a-light type="directional" position="0 1 1" intensity="0.8" castShadow="true"></a-light>
+    <a-light type="point" position="0 0 0" rotation="0 20 0" target="#directionaltarget" intensity="0.75">
+      <a-entity id="directionaltarget" position="0 5 3"></a-entity>
+    </a-light>
 
     <!-- Camera -->
     <a-entity camera look-controls wasd-controls position="0 1.6 0" cursor="rayOrigin: mouse"></a-entity>
@@ -76,9 +115,19 @@
                    align: center;
                    maxWidth: 4;" position="0 3.5 -4"></a-entity>
 
-    <!-- Single frog that will move from right to left - initially hidden -->
-    <a-entity id="hopping-frog" gltf-model="#frog_jump" scale="1 1 1" position="6 0.2 -2" rotation="0 -90 0"
-      animation-mixer="clip: metarig|jump;" visible="false">
+    <!-- Container for frogs - all initially hidden -->
+    <a-entity id="frogs-container" visible="false">
+      <!-- Frogs will be defined by positions array in JavaScript -->
+    </a-entity>
+
+    <!-- Container for diamond swords - all initially hidden -->
+    <a-entity id="swords-container" visible="false">
+      <!-- Swords will be defined by positions array in JavaScript -->
+    </a-entity>
+
+    <!-- Container for hearts - all initially hidden -->
+    <a-entity id="hearts-container" visible="false">
+      <!-- Hearts will be defined by positions array in JavaScript -->
     </a-entity>
 
     <!-- Yes button with more prominent label -->
@@ -90,12 +139,12 @@
                 dur: 500;
                 to: 0 10 0;
             " animation__mouseleave="
-                property: rotation;
+                property: rotation; 
                 startEvents: mouseleave;
                 dur: 500;
                 to: 0 0 0;
             " class="clickable"></a-box>
-      <a-text value="YES" color="#ffffff" position="0 0 0.4" align="center" width="2" height="2" scale="2 2 2"
+      <a-text value="SI" color="#ffffff" position="0 0 0.4" align="center" width="2" height="2" scale="2 2 2"
         font="monoid"></a-text>
     </a-entity>
 
@@ -144,17 +193,170 @@
       }
     });
 
+    // Custom component for floating animation (used for both swords and hearts)
+    AFRAME.registerComponent('floating-animation', {
+      schema: {
+        distance: { type: 'number', default: 15 },
+        duration: { type: 'number', default: 4000 },
+        delay: { type: 'number', default: 0 }
+      },
+
+      init: function () {
+        // Store initial properties
+        this.startAnimation();
+      },
+
+      startAnimation: function () {
+        const el = this.el;
+        const data = this.data;
+
+        // Start position (ground level)
+        const startY = el.getAttribute('position').y;
+        const endY = startY + data.distance;
+
+        // Base position (x and z coordinates)
+        const posX = el.getAttribute('position').x;
+        const posZ = el.getAttribute('position').z;
+
+        // Set up initial animation
+        el.setAttribute('animation__up', {
+          property: 'position',
+          from: `${posX} ${startY} ${posZ}`,
+          to: `${posX} ${endY} ${posZ}`,
+          dur: data.duration,
+          delay: data.delay,
+          easing: 'easeOutQuad',
+          loop: false,
+          autoplay: true,
+          startEvents: 'animationstart'
+        });
+
+        // Listen for the end of the up animation
+        el.addEventListener('animationcomplete__up', function () {
+          // When it reaches the top, teleport it back to the bottom (invisible)
+          el.setAttribute('visible', 'false');
+
+          // Short delay before resetting position and starting next animation
+          setTimeout(function () {
+            // Reset position to bottom
+            el.setAttribute('position', `${posX} ${startY} ${posZ}`);
+            el.setAttribute('visible', 'true');
+
+            // Trigger the up animation again
+            el.emit('animationstart');
+          }, 500); // Half-second delay before restarting
+        });
+
+        // Emit the initial animation start event
+        setTimeout(function () {
+          el.emit('animationstart');
+        }, data.delay);
+      }
+    });
+
     // Wait for scene to load
     document.querySelector('a-scene').addEventListener('loaded', function () {
       const noBox = document.getElementById('no-box');
       const yesBox = document.getElementById('yes-box');
       const questionText = document.getElementById('question-text');
-      const hoppingFrog = document.getElementById('hopping-frog');
+      const frogsContainer = document.getElementById('frogs-container');
+      const swordsContainer = document.getElementById('swords-container');
+      const heartsContainer = document.getElementById('hearts-container');
       const successMessage = document.getElementById('success-message');
       const titleOverlay = document.getElementById('title-overlay');
+      const celebrationTitle = document.getElementById('celebration-title');
+
+      // Define frog positions - [x, y, z]
+      const frogPositions = [
+        [12, 0, -2],
+        [8, 0, -2],
+        [4, 0, -2],    // right
+        [0, 0, -2],    // center
+        [-4, 0, -2],    // left
+        [-8, 0, -2],
+        [-12, 0, -2]
+      ];
+
+      // Use the same x positions for swords but at z=-4
+      const swordPositions = frogPositions.map(pos => [pos[0], 2, -4]);
+
+      // Use the same x positions for hearts but at z=-6
+      const heartPositions = frogPositions.map(pos => [pos[0], 2, -6]);
+
+      // Heart colors - sage green and light blue
+      const heartColors = {
+        green: "#7bc97f", // Sage green
+        blue: "#a3d9ff"   // Light blue
+      };
+
+      // Create frogs during scene initialization
+      const frogs = [];
+      frogPositions.forEach((pos, index) => {
+        const frog = document.createElement('a-entity');
+        frog.id = `hopping-frog-${index}`;
+        frog.setAttribute('gltf-model', '#frog_jump');
+        frog.setAttribute('scale', '0.8 0.8 0.8');
+        frog.setAttribute('position', pos.join(' '));
+        frog.setAttribute('rotation', '0 -90 0');  // Facing left
+        frog.setAttribute('animation-mixer', 'clip: metarig|jump;');
+        frog.setAttribute('visible', 'false');
+
+        // Add frog to container
+        frogsContainer.appendChild(frog);
+
+        // Store reference to frog
+        frogs.push(frog);
+      });
+
+      // Create diamond swords
+      const swords = [];
+      swordPositions.forEach((pos, index) => {
+        const sword = document.createElement('a-entity');
+        sword.id = `diamond-sword-${index}`;
+        sword.setAttribute('gltf-model', '#diamond_sword');
+        sword.setAttribute('scale', '0.1 0.1 0.1');
+        sword.setAttribute('position', pos.join(' '));
+        sword.setAttribute('rotation', '90 -90 -90');
+        sword.setAttribute('visible', 'false');
+
+        // Add sword to container
+        swordsContainer.appendChild(sword);
+
+        // Store reference to sword
+        swords.push(sword);
+      });
+
+      // Create text-based emoticon hearts with DOUBLE SIZE
+      const hearts = [];
+      heartPositions.forEach((pos, index) => {
+        const heart = document.createElement('a-entity');
+        const isGreen = index % 2 === 0; // Even indexes are green, odd are blue
+
+        heart.id = `heart-${index}`;
+
+        // Set up troika-text for emoticon heart <3 with DOUBLE SIZE
+        heart.setAttribute('troika-text', {
+          value: "<3",
+          color: isGreen ? heartColors.green : heartColors.blue,
+          fontSize: 2.4, // DOUBLED from 1.2 to 2.4
+          font: "https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.woff",
+          align: "center"
+        });
+
+        heart.setAttribute('scale', '1 1 1');
+        heart.setAttribute('position', pos.join(' '));
+        heart.setAttribute('rotation', '0 0 0');
+        heart.setAttribute('visible', 'false');
+
+        // Add heart to container
+        heartsContainer.appendChild(heart);
+
+        // Store reference to heart
+        hearts.push(heart);
+      });
 
       // Check if elements exist (prevents null reference errors)
-      if (!noBox || !yesBox || !questionText || !hoppingFrog || !successMessage) {
+      if (!noBox || !yesBox || !questionText || !frogsContainer || !swordsContainer || !heartsContainer || !successMessage || frogs.length === 0 || swords.length === 0 || hearts.length === 0) {
         console.error("One or more required elements not found in the DOM");
         return;
       }
@@ -178,7 +380,7 @@
         });
       }
 
-      // When "Yes" is clicked, show the frog animation
+      // When "Yes" is clicked, show the frog animation, swords, and hearts
       yesBox.addEventListener('click', function () {
         // Hide all UI elements
         yesBox.setAttribute('visible', 'false');
@@ -190,95 +392,43 @@
           titleOverlay.style.display = 'none';
         }
 
-        // Show the success message
-        successMessage.setAttribute('visible', 'true');
+        // Show the celebration title
+        if (celebrationTitle) {
+          celebrationTitle.style.display = 'block';
+        }
 
-        // Show the hopping frog
-        hoppingFrog.setAttribute('visible', 'true');
-
-        // Reset frog position
-        hoppingFrog.setAttribute('position', '8 0.2 -2');
-
-        // Start the frog animation
-        startSimpleFrogAnimation();
-
-        // Set a timeout to hide the success message after a few seconds
-        setTimeout(function () {
-          // Hide success message after 3 seconds to leave only the frog
-          successMessage.setAttribute('visible', 'false');
-        }, 3000);
-      });
-
-      // Simpler animation approach using continuous animation
-      function startSimpleFrogAnimation() {
-        // Create a simple animation that moves the frog from right to left
-        // and then teleports it back to the start
-
-        // This animation component will handle the continuous movement
-        AFRAME.registerComponent('frog-hop', {
-          init: function () {
-            const frog = this.el;
-            let startX = 8;  // Right side
-            let endX = -8;   // Left side
-            let hopDistance = 3; // Longer hop distance
-            let currentX = startX;
-            let animationRunning = false;
-
-            // Function to start a single hop
-            const startHop = () => {
-              if (animationRunning) return;
-              animationRunning = true;
-
-              // Calculate next position
-              const nextX = currentX - hopDistance;
-
-              // If we've gone past the left edge, reset to right
-              if (nextX < endX) {
-                // Instantly move frog back to start
-                frog.setAttribute('position', `${startX} 0.2 -2`);
-                currentX = startX;
-                animationRunning = false;
-                setTimeout(startHop, 100); // Small delay before starting next hop
-                return;
-              }
-
-              // Create the hop animation with a proper arc
-              frog.setAttribute('animation__x', {
-                property: 'position.x',
-                from: currentX,
-                to: nextX,
-                dur: 700,
-                easing: 'linear'
-              });
-
-              // Up and down animation for hopping
-              frog.setAttribute('animation__y', {
-                property: 'position.y',
-                from: 0.2,
-                to: 0.8,
-                dir: 'alternate',
-                dur: 700,
-                easing: 'easeInOutQuad'
-              });
-
-              // Update current position
-              currentX = nextX;
-
-              // When animation completes, start next hop
-              setTimeout(() => {
-                animationRunning = false;
-                startHop();
-              }, 700 + 300); // Hop duration + small pause between hops
-            };
-
-            // Start the hopping sequence
-            startHop();
-          }
+        // Show the frogs container and all frogs
+        frogsContainer.setAttribute('visible', 'true');
+        frogs.forEach(frog => {
+          frog.setAttribute('visible', 'true');
         });
 
-        // Add the component to the frog to start the animation
-        hoppingFrog.setAttribute('frog-hop', '');
-      }
+        // Show the swords container and start sword animations immediately
+        swordsContainer.setAttribute('visible', 'true');
+        swords.forEach((sword, index) => {
+          sword.setAttribute('visible', 'true');
+          sword.setAttribute('floating-animation', {
+            distance: 15,
+            duration: 4000,
+            delay: index * 200 // Slightly stagger each sword
+          });
+        });
+
+        // Delay heart animations to start 1 second AFTER the swords begin
+        // This ensures the hearts are visible after the swords are already in motion
+        setTimeout(function () {
+          // Show the hearts container and start heart animations
+          heartsContainer.setAttribute('visible', 'true');
+          hearts.forEach((heart, index) => {
+            heart.setAttribute('visible', 'true');
+            heart.setAttribute('floating-animation', {
+              distance: 15,
+              duration: 4500, // Slightly slower than swords
+              delay: index * 300 // Staggered delay for each heart
+            });
+          });
+        }, 1000); // 1 second delay before starting hearts animation
+      });
     });
   </script>
 </body>
